@@ -1,1 +1,301 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Primary Meta Tags -->
+    <title>Budget Receipt - Free Personal Finance Tracker & Expense Manager</title>
+    <meta name="title" content="Budget Receipt - Free Personal Finance Tracker & Expense Manager">
+    <meta name="description" content="Free budget receipt tracker for couples and individuals. Track expenses, manage shared costs, plan savings goals, and download printable A4 PDF budget receipts. Perfect for paycheck to paycheck budgeting.">
+    <meta name="keywords" content="budget tracker, expense tracker, budget receipt, personal finance, couple budget, shared expenses, savings tracker, paycheck to paycheck, budget planner, financial planning, money management, expense manager">
+    <meta name="author" content="Budget Receipt">
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="English">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Budget Receipt - Free Personal Finance Tracker">
+    <meta property="og:description" content="Track expenses, manage shared costs, and plan savings with our free budget receipt tracker. Download printable PDF budget receipts.">
+    <meta property="og:site_name" content="Budget Receipt">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="Budget Receipt - Free Personal Finance Tracker">
+    <meta property="twitter:description" content="Track expenses, manage shared costs, and plan savings with our free budget receipt tracker.">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://yourwebsite.com/budget-receipt">
+    
+    <!-- Structured Data for SEO -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Budget Receipt",
+      "description": "Free budget receipt tracker for managing personal finances, shared expenses, and savings goals",
+      "applicationCategory": "FinanceApplication",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "featureList": [
+        "Expense tracking",
+        "Shared cost management",
+        "Savings goal planning",
+        "PDF receipt download",
+        "Annual budget overview"
+      ]
+    }
+    </script>
+    
+</head
+  <body>
+    <!-- Loading Receipt Overlay -->
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-receipt">
+            <h2>BUDGET RECEIPT</h2>
+            <div class="store-info">
+                Your Personal Finance Manager
+                <br>
+                budgetreceipt.com
+                <br>
+                ================================
+            </div>
+            
+            <div class="loading-item">
+                <span>INITIALIZING SYSTEM</span>
+                <span id="status-1">...</span>
+            </div>
+            <div class="loading-item">
+                <span>LOADING YOUR DATA</span>
+                <span id="status-2">...</span>
+            </div>
+            <div class="loading-item">
+                <span>PREPARING RECEIPT</span>
+                <span id="status-3">...</span>
+            </div>
+            
+            <div style="border-top: 1px dashed #999; margin: 15px 0; padding-top: 15px;">
+                <div class="loading-status" id="loading-text">Processing...</div>
+                <div class="loading-bar-container">
+                    <div class="loading-bar" id="loading-bar">0%</div>
+                </div>
+            </div>
+            
+            <div class="checkmark" id="checkmark" style="display: none;">✓</div>
+            <div id="complete-text" style="display: none; font-weight: bold; margin-top: 10px;">
+                PAYMENT PROCESSED
+                <br>
+                <span style="font-size: 11px; color: #666;">THANK YOU!</span>
+            </div>
+            
+            <div style="border-top: 2px solid #000; margin-top: 20px; padding-top: 15px; font-size: 11px; color: #666;">
+                <div id="timestamp"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Authentication Section -->
+    <div class="auth-section" id="auth-section">
+        <h2>BUDGET RECEIPT ACCOUNT</h2>
+        <div id="logged-out-view">
+            <div class="social-login">
+                <button class="social-btn google" onclick="handleSocialLogin('google')">
+                    <span class="social-icon">🔵</span>
+                    <span>Continue with Google</span>
+                </button>
+                <button class="social-btn apple" onclick="handleSocialLogin('apple')">
+                    <span class="social-icon">🍎</span>
+                    <span>Continue with Apple</span>
+                </button>
+                <button class="social-btn microsoft" onclick="handleSocialLogin('microsoft')">
+                    <span class="social-icon">🪟</span>
+                    <span>Continue with Microsoft</span>
+                </button>
+                <button class="social-btn facebook" onclick="handleSocialLogin('facebook')">
+                    <span class="social-icon">📘</span>
+                    <span>Continue with Facebook</span>
+                </button>
+            </div>
+            
+            <div class="divider">
+                <span>OR</span>
+            </div>
+            
+            <div class="auth-tabs">
+                <div class="auth-tab active" onclick="switchAuthTab('login')">LOGIN</div>
+                <div class="auth-tab" onclick="switchAuthTab('signup')">SIGN UP</div>
+            </div>
+            <div id="login-form" class="auth-form">
+                <input type="email" id="login-email" placeholder="Email">
+                <input type="password" id="login-password" placeholder="Password">
+                <button class="update-btn" onclick="handleLogin()">LOGIN</button>
+            </div>
+            <div id="signup-form" class="auth-form" style="display: none;">
+                <input type="email" id="signup-email" placeholder="Email">
+                <input type="password" id="signup-password" placeholder="Password (min 6 characters)">
+                <input type="password" id="signup-confirm" placeholder="Confirm Password">
+                <button class="update-btn" onclick="handleSignup()">SIGN UP</button>
+            </div>
+            <div style="font-size: 11px; color: #666; margin-top: 10px;">
+                Save your budget data and access it from any device
+            </div>
+        </div>
+        <div id="logged-in-view" style="display: none;">
+            <div class="user-info">
+                <span>Logged in as: <strong id="user-email"></strong></span>
+                <button class="logout-btn" onclick="handleLogout()">LOGOUT</button>
+            </div>
+            <div class="save-indicator" id="save-indicator">✓ Data auto-saved</div>
+        </div>
+    </div>
+
+    <div class="name-input-section">
+        <h2>CUSTOMIZE SETTINGS</h2>
+        <div class="name-inputs">
+            <div class="name-input-group">
+                <label>PERSON 1:</label>
+                <input type="text" id="name1" value="John" placeholder="Enter name">
+            </div>
+            <div class="name-input-group">
+                <label>PERSON 2:</label>
+                <input type="text" id="name2" value="Jane" placeholder="Enter name">
+            </div>
+        </div>
+        <div class="name-inputs">
+            <div class="name-input-group">
+                <label>PAY FREQUENCY:</label>
+                <select id="pay-frequency">
+                    <option value="weekly">Weekly</option>
+                    <option value="fortnightly" selected>Fortnightly</option>
+                    <option value="monthly">Monthly</option>
+                </select>
+            </div>
+            <div class="name-input-group">
+                <label>NEXT PAYDAY:</label>
+                <input type="date" id="payday" style="width: 150px;">
+            </div>
+        </div>
+        <button class="update-btn" onclick="updateNames()">UPDATE SETTINGS</button>
+        <button class="overview-btn" onclick="showAnnualOverview()">ANNUAL RECEIPT</button>
+        <button class="download-btn" onclick="downloadReceipt()">DOWNLOAD PDF</button>
+    </div>
+
+    <div class="receipt-container" id="budget-receipt">
+        <div class="receipt-header">
+            <h1>BUDGET RECEIPT</h1>
+            <div id="header-names">John & Jane</div>
+            <div class="date">October 2025</div>
+        </div>
+
+        <div class="summary-section">
+            <div class="summary-item">
+                <span id="income-label-1">JOHN INCOME:</span>
+                <input type="number" id="income1" value="2300" onchange="calculateSpendable()">
+            </div>
+            <div class="summary-item">
+                <span id="income-label-2">JANE INCOME:</span>
+                <input type="number" id="income2" value="1600" onchange="calculateSpendable()">
+            </div>
+            <div class="summary-item total">
+                <span>TOTAL INCOME:</span>
+                <span id="total-income">$3,900.00</span>
+            </div>
+        </div>
+
+        <div class="split-selector">
+            <label>SPLIT TYPE:</label>
+            <select id="split-type" onchange="updateSplit()">
+                <option value="50/50" selected>50/50</option>
+                <option value="75/25">75/25</option>
+                <option value="25/75">25/75</option>
+                <option value="40/60">40/60</option>
+                <option value="55/45">55/45</option>
+            </select>
+        </div>
+
+        <div class="section-title">SHARED EXPENSES</div>
+        <div class="three-col">
+            <span>ITEM</span>
+            <span id="col-name-1-1">JOHN</span>
+            <span id="col-name-2-1">JANE</span>
+        </div>
+        <div id="shared-expenses-body"></div>
+        <button class="add-item-btn" onclick="addItem('shared')">+ ADD EXPENSE</button>
+
+        <div class="section-title">SUBSCRIPTIONS</div>
+        <div class="three-col">
+            <span>SERVICE</span>
+            <span id="col-name-1-2">JOHN</span>
+            <span id="col-name-2-2">JANE</span>
+        </div>
+        <div id="subscriptions-body"></div>
+        <button class="add-item-btn" onclick="addItem('subscription')">+ ADD SUBSCRIPTION</button>
+
+        <div class="section-title">DEBT PAYMENTS</div>
+        <div class="three-col">
+            <span>ITEM</span>
+            <span id="col-name-1-3">JOHN</span>
+            <span id="col-name-2-3">JANE</span>
+        </div>
+        <div id="debt-body"></div>
+        <button class="add-item-btn" onclick="addItem('debt')">+ ADD DEBT</button>
+
+        <div class="section-title">SAVINGS GOALS</div>
+        <div class="three-col">
+            <span>GOAL</span>
+            <span id="col-name-1-4">JOHN</span>
+            <span id="col-name-2-4">JANE</span>
+        </div>
+        <div id="savings-body"></div>
+        <button class="add-item-btn" onclick="addItem('savings')">+ ADD GOAL</button>
+
+        <div class="section-title">OTHER SPENDING</div>
+        <div class="three-col">
+            <span>ITEM</span>
+            <span id="col-name-1-5">JOHN</span>
+            <span id="col-name-2-5">JANE</span>
+        </div>
+        <div id="other-spending-body"></div>
+        <button class="add-item-btn" onclick="addItem('other')">+ ADD OTHER</button>
+
+        <div class="receipt-totals">
+            <div class="grand-total">
+                <span id="spendable-label-1">JOHN SPENDABLE:</span>
+                <span id="person1-spendable">$0.00</span>
+            </div>
+            <div class="grand-total">
+                <span id="spendable-label-2">JANE SPENDABLE:</span>
+                <span id="person2-spendable">$0.00</span>
+            </div>
+        </div>
+
+        <div class="receipt-footer">
+            THANK YOU FOR BUDGETING RESPONSIBLY!
+            <br>
+            ================================
+        </div>
+    </div>
+
+    <!-- Annual Receipt Modal -->
+    <div id="annualModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="close" onclick="closeModal()">&times;</span>
+                <h2>ANNUAL RECEIPT</h2>
+                <div id="overview-subtitle"></div>
+            </div>
+            <div id="overview-content"></div>
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="download-btn" onclick="downloadAnnualReceipt()">DOWNLOAD ANNUAL PDF</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+
+  
