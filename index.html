@@ -27,8 +27,10 @@
     
     <!-- Canonical URL -->
     <link rel="canonical" href="https://yourwebsite.com/budget-receipt">
-    
-    <!-- Structured Data for SEO -->
+    <link rel="stylesheet" href="styles.css">
+<script src="script.js" defer></script>
+
+     <!-- Structured Data for SEO -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -50,9 +52,9 @@
       ]
     }
     </script>
-    
-</head
-  <body>
+
+    </head>
+<body>
     <!-- Loading Receipt Overlay -->
     <div class="loading-overlay" id="loading-overlay">
         <div class="loading-receipt">
@@ -155,7 +157,31 @@
 
     <div class="name-input-section">
         <h2>CUSTOMIZE SETTINGS</h2>
-        <div class="name-inputs">
+        
+        <div style="margin-bottom: 20px;">
+            <label style="font-size: 12px; font-weight: bold; display: block; margin-bottom: 10px;">BUDGET MODE:</label>
+            <div style="display: flex; gap: 10px; justify-content: center;">
+                <button class="auth-tab" id="mode-alone" onclick="setBudgetMode('alone')">ALONE</button>
+                <button class="auth-tab active" id="mode-partner" onclick="setBudgetMode('partner')">WITH PARTNER</button>
+            </div>
+        </div>
+        
+        <div id="partner-selector" style="margin-bottom: 20px;">
+            <label style="font-size: 12px; font-weight: bold; display: block; margin-bottom: 10px;">SELECT PARTNER:</label>
+            <div style="display: flex; gap: 10px; justify-content: center; align-items: center;">
+                <input type="email" id="partner-email" placeholder="Partner's email" style="width: 200px; padding: 8px; font-family: 'Courier New', monospace; border: 1px solid #999;">
+                <button class="update-btn" onclick="linkPartner()">LINK PARTNER</button>
+            </div>
+            <div id="partner-status" style="font-size: 11px; margin-top: 8px; color: #666;"></div>
+            <div id="linked-partner" style="display: none; margin-top: 10px; padding: 10px; background-color: #e6f3ff; border: 1px solid #0066cc;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 12px;">Linked with: <strong id="linked-partner-email"></strong></span>
+                    <button class="delete-btn" onclick="unlinkPartner()">UNLINK</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="name-inputs" id="partner-names">
             <div class="name-input-group">
                 <label>PERSON 1:</label>
                 <input type="text" id="name1" value="John" placeholder="Enter name">
@@ -165,6 +191,14 @@
                 <input type="text" id="name2" value="Jane" placeholder="Enter name">
             </div>
         </div>
+        
+        <div class="name-inputs" id="alone-name" style="display: none;">
+            <div class="name-input-group">
+                <label>YOUR NAME:</label>
+                <input type="text" id="name-single" value="John" placeholder="Enter your name">
+            </div>
+        </div>
+        
         <div class="name-inputs">
             <div class="name-input-group">
                 <label>PAY FREQUENCY:</label>
@@ -196,17 +230,17 @@
                 <span id="income-label-1">JOHN INCOME:</span>
                 <input type="number" id="income1" value="2300" onchange="calculateSpendable()">
             </div>
-            <div class="summary-item">
+            <div class="summary-item" id="income-row-2">
                 <span id="income-label-2">JANE INCOME:</span>
                 <input type="number" id="income2" value="1600" onchange="calculateSpendable()">
             </div>
             <div class="summary-item total">
-                <span>TOTAL INCOME:</span>
+                <span id="total-income-label">TOTAL INCOME:</span>
                 <span id="total-income">$3,900.00</span>
             </div>
         </div>
 
-        <div class="split-selector">
+        <div class="split-selector" id="split-selector-section">
             <label>SPLIT TYPE:</label>
             <select id="split-type" onchange="updateSplit()">
                 <option value="50/50" selected>50/50</option>
@@ -218,7 +252,7 @@
         </div>
 
         <div class="section-title">SHARED EXPENSES</div>
-        <div class="three-col">
+        <div class="three-col" id="header-shared">
             <span>ITEM</span>
             <span id="col-name-1-1">JOHN</span>
             <span id="col-name-2-1">JANE</span>
@@ -227,7 +261,7 @@
         <button class="add-item-btn" onclick="addItem('shared')">+ ADD EXPENSE</button>
 
         <div class="section-title">SUBSCRIPTIONS</div>
-        <div class="three-col">
+        <div class="three-col" id="header-subscriptions">
             <span>SERVICE</span>
             <span id="col-name-1-2">JOHN</span>
             <span id="col-name-2-2">JANE</span>
@@ -236,7 +270,7 @@
         <button class="add-item-btn" onclick="addItem('subscription')">+ ADD SUBSCRIPTION</button>
 
         <div class="section-title">DEBT PAYMENTS</div>
-        <div class="three-col">
+        <div class="three-col" id="header-debt">
             <span>ITEM</span>
             <span id="col-name-1-3">JOHN</span>
             <span id="col-name-2-3">JANE</span>
@@ -245,7 +279,7 @@
         <button class="add-item-btn" onclick="addItem('debt')">+ ADD DEBT</button>
 
         <div class="section-title">SAVINGS GOALS</div>
-        <div class="three-col">
+        <div class="three-col" id="header-savings">
             <span>GOAL</span>
             <span id="col-name-1-4">JOHN</span>
             <span id="col-name-2-4">JANE</span>
@@ -254,7 +288,7 @@
         <button class="add-item-btn" onclick="addItem('savings')">+ ADD GOAL</button>
 
         <div class="section-title">OTHER SPENDING</div>
-        <div class="three-col">
+        <div class="three-col" id="header-other">
             <span>ITEM</span>
             <span id="col-name-1-5">JOHN</span>
             <span id="col-name-2-5">JANE</span>
@@ -267,7 +301,7 @@
                 <span id="spendable-label-1">JOHN SPENDABLE:</span>
                 <span id="person1-spendable">$0.00</span>
             </div>
-            <div class="grand-total">
+            <div class="grand-total" id="spendable-row-2">
                 <span id="spendable-label-2">JANE SPENDABLE:</span>
                 <span id="person2-spendable">$0.00</span>
             </div>
@@ -294,8 +328,5 @@
             </div>
         </div>
     </div>
-</body>
+    </body>
 </html>
-
-
-  
