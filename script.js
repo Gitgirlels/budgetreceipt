@@ -1,5 +1,4 @@
-
-     // Show loading animation on page load
+  // Show loading animation on page load
         function showLoadingAnimation() {
             const overlay = document.getElementById('loading-overlay');
             const loadingBar = document.getElementById('loading-bar');
@@ -67,6 +66,68 @@
         // Authentication State
         let currentUser = null;
         let autoSaveTimeout = null;
+        let budgetMode = 'partner'; // 'alone' or 'partner'
+
+        function setBudgetMode(mode) {
+            budgetMode = mode;
+            
+            // Update button states
+            document.getElementById('mode-alone').classList.remove('active');
+            document.getElementById('mode-partner').classList.remove('active');
+            document.getElementById('mode-' + mode).classList.add('active');
+            
+            // Toggle visibility of name inputs
+            if (mode === 'alone') {
+                document.getElementById('partner-names').style.display = 'none';
+                document.getElementById('alone-name').style.display = 'flex';
+                document.getElementById('income-row-2').style.display = 'none';
+                document.getElementById('spendable-row-2').style.display = 'none';
+                document.getElementById('split-selector-section').style.display = 'none';
+                
+                // Hide partner columns in all sections
+                hidePartnerColumns(true);
+                
+                // Update labels
+                const name = document.getElementById('name-single').value || 'You';
+                document.getElementById('header-names').textContent = name;
+                document.getElementById('income-label-1').textContent = 'YOUR INCOME:';
+                document.getElementById('total-income-label').textContent = 'TOTAL INCOME:';
+                document.getElementById('spendable-label-1').textContent = 'YOUR SPENDABLE:';
+                
+            } else {
+                document.getElementById('partner-names').style.display = 'flex';
+                document.getElementById('alone-name').style.display = 'none';
+                document.getElementById('income-row-2').style.display = 'flex';
+                document.getElementById('spendable-row-2').style.display = 'flex';
+                document.getElementById('split-selector-section').style.display = 'block';
+                
+                // Show partner columns
+                hidePartnerColumns(false);
+            }
+            
+            updateNames();
+            autoSave();
+        }
+
+        function hidePartnerColumns(hide) {
+            const headers = ['header-shared', 'header-subscriptions', 'header-debt', 'header-savings', 'header-other'];
+            headers.forEach(headerId => {
+                const header = document.getElementById(headerId);
+                const columns = header.querySelectorAll('span');
+                if (hide) {
+                    columns[2].style.display = 'none'; // Hide partner column
+                } else {
+                    columns[2].style.display = 'block';
+                }
+            });
+            
+            // Re-render all sections to update column visibility
+            renderSection('shared-expenses-body', sharedExpensesData, 'shared');
+            renderSection('subscriptions-body', subscriptionsData, 'subscription');
+            renderSection('debt-body', debtData, 'debt');
+            renderSection('savings-body', savingsData, 'savings');
+            renderSection('other-spending-body', otherSpendingData, 'other');
+        }
 
         // Check if user is logged in on page load
         function checkAuth() {
@@ -286,6 +347,8 @@
             if (!currentUser) return;
 
             const userData = {
+                budgetMode,
+                nameSingle: document.getElementById('name-single').value,
                 name1: document.getElementById('name1').value,
                 name2: document.getElementById('name2').value,
                 payFrequency: document.getElementById('pay-frequency').value,
@@ -318,6 +381,12 @@
             if (savedData) {
                 const userData = JSON.parse(savedData);
                 
+                if (userData.budgetMode) {
+                    budgetMode = userData.budgetMode;
+                    setBudgetMode(budgetMode);
+                }
+                
+                document.getElementById('name-single').value = userData.nameSingle || 'John';
                 document.getElementById('name1').value = userData.name1 || 'John';
                 document.getElementById('name2').value = userData.name2 || 'Jane';
                 document.getElementById('pay-frequency').value = userData.payFrequency || 'fortnightly';
@@ -422,20 +491,32 @@
         }
 
         function updateNames() {
-            const name1 = document.getElementById('name1').value || 'Person 1';
-            const name2 = document.getElementById('name2').value || 'Person 2';
-            
-            document.getElementById('header-names').textContent = `${name1} & ${name2}`;
-            document.getElementById('income-label-1').textContent = `${name1.toUpperCase()} INCOME:`;
-            document.getElementById('income-label-2').textContent = `${name2.toUpperCase()} INCOME:`;
-            
-            for (let i = 1; i <= 5; i++) {
-                document.getElementById(`col-name-1-${i}`).textContent = name1.toUpperCase();
-                document.getElementById(`col-name-2-${i}`).textContent = name2.toUpperCase();
+            if (budgetMode === 'alone') {
+                const name = document.getElementById('name-single').value || 'You';
+                document.getElementById('header-names').textContent = name;
+                document.getElementById('income-label-1').textContent = 'YOUR INCOME:';
+                document.getElementById('spendable-label-1').textContent = 'YOUR SPENDABLE:';
+                
+                // Update all column headers to show only single name
+                for (let i = 1; i <= 5; i++) {
+                    document.getElementById(`col-name-1-${i}`).textContent = name.toUpperCase();
+                }
+            } else {
+                const name1 = document.getElementById('name1').value || 'Person 1';
+                const name2 = document.getElementById('name2').value || 'Person 2';
+                
+                document.getElementById('header-names').textContent = `${name1} & ${name2}`;
+                document.getElementById('income-label-1').textContent = `${name1.toUpperCase()} INCOME:`;
+                document.getElementById('income-label-2').textContent = `${name2.toUpperCase()} INCOME:`;
+                
+                for (let i = 1; i <= 5; i++) {
+                    document.getElementById(`col-name-1-${i}`).textContent = name1.toUpperCase();
+                    document.getElementById(`col-name-2-${i}`).textContent = name2.toUpperCase();
+                }
+                
+                document.getElementById('spendable-label-1').textContent = `${name1.toUpperCase()} SPENDABLE:`;
+                document.getElementById('spendable-label-2').textContent = `${name2.toUpperCase()} SPENDABLE:`;
             }
-            
-            document.getElementById('spendable-label-1').textContent = `${name1.toUpperCase()} SPENDABLE:`;
-            document.getElementById('spendable-label-2').textContent = `${name2.toUpperCase()} SPENDABLE:`;
             
             autoSave();
         }
@@ -547,15 +628,25 @@
                 const row = document.createElement('div');
                 row.className = 'receipt-item';
                 
-                row.innerHTML = `
-                    <input type="text" class="item-name" value="${item.name}" 
-                           onchange="updateItemName('${type}', ${index}, this.value)">
-                    <input type="number" step="0.01" value="${item.person1}" 
-                           onchange="updateItemValue('${type}', ${index}, 'person1', this.value)">
-                    <input type="number" step="0.01" value="${item.person2}" 
-                           onchange="updateItemValue('${type}', ${index}, 'person2', this.value)">
-                    <button class="delete-btn" onclick="deleteItem('${type}', ${index})">DEL</button>
-                `;
+                if (budgetMode === 'alone') {
+                    row.innerHTML = `
+                        <input type="text" class="item-name" value="${item.name}" 
+                               onchange="updateItemName('${type}', ${index}, this.value)">
+                        <input type="number" step="0.01" value="${item.person1}" 
+                               onchange="updateItemValue('${type}', ${index}, 'person1', this.value)">
+                        <button class="delete-btn" onclick="deleteItem('${type}', ${index})">DEL</button>
+                    `;
+                } else {
+                    row.innerHTML = `
+                        <input type="text" class="item-name" value="${item.name}" 
+                               onchange="updateItemName('${type}', ${index}, this.value)">
+                        <input type="number" step="0.01" value="${item.person1}" 
+                               onchange="updateItemValue('${type}', ${index}, 'person1', this.value)">
+                        <input type="number" step="0.01" value="${item.person2}" 
+                               onchange="updateItemValue('${type}', ${index}, 'person2', this.value)">
+                        <button class="delete-btn" onclick="deleteItem('${type}', ${index})">DEL</button>
+                    `;
+                }
                 
                 tbody.appendChild(row);
                 totalPerson1 += item.person1;
@@ -564,12 +655,22 @@
 
             const totalRow = document.createElement('div');
             totalRow.className = 'receipt-item total-row';
-            totalRow.innerHTML = `
-                <span>TOTAL:</span>
-                <span style="text-align: right; width: 70px;">${formatMoney(totalPerson1)}</span>
-                <span style="text-align: right; width: 70px;">${formatMoney(totalPerson2)}</span>
-                <span style="width: 48px;"></span>
-            `;
+            
+            if (budgetMode === 'alone') {
+                totalRow.innerHTML = `
+                    <span>TOTAL:</span>
+                    <span style="text-align: right; width: 70px;">${formatMoney(totalPerson1)}</span>
+                    <span style="width: 48px;"></span>
+                `;
+            } else {
+                totalRow.innerHTML = `
+                    <span>TOTAL:</span>
+                    <span style="text-align: right; width: 70px;">${formatMoney(totalPerson1)}</span>
+                    <span style="text-align: right; width: 70px;">${formatMoney(totalPerson2)}</span>
+                    <span style="width: 48px;"></span>
+                `;
+            }
+            
             tbody.appendChild(totalRow);
         }
 
@@ -819,6 +920,7 @@
         updateNames();
 
         // Add input listeners for auto-save
+        document.getElementById('name-single').addEventListener('input', autoSave);
         document.getElementById('name1').addEventListener('input', autoSave);
         document.getElementById('name2').addEventListener('input', autoSave);
         document.getElementById('pay-frequency').addEventListener('change', autoSave);
